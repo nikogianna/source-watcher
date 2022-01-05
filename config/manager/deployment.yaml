@@ -53,7 +53,12 @@ spec:
           volumeMounts:
             - name: tmp
               mountPath: /tmp
+            - name: pipelinerun
+              mountPath: /home/vagrant/applier/run-clone.yaml
+              subPath: run-clone.yaml
       volumes:
         - name: tmp
           emptyDir: {}
-
+        - name: pipelinerun
+          configMap:
+            name: pipeconfig

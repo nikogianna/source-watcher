@@ -17,7 +17,7 @@ import (
 	"k8s.io/client-go/dynamic"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/restmapper"
-	"k8s.io/client-go/tools/clientcmd"
+	//"k8s.io/client-go/tools/clientcmd"
 	//"k8s.io/client-go/util/homedir"
 
 	"github.com/go-logr/logr"
@@ -26,7 +26,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	sourcev1 "github.com/fluxcd/source-controller/api/v1beta1"
-	//"k8s.io/client-go/rest"
+	"k8s.io/client-go/rest"
 )
 
 type GitRepositoryWatcher struct {
@@ -43,12 +43,15 @@ func (r *GitRepositoryWatcher) Reconcile(ctx context.Context, req ctrl.Request) 
 		return ctrl.Result{}, client.IgnoreNotFound(err)
 	}
 
-	log.Info("Brand New revision detected", "revision", repository.Status.Artifact.Revision)
+	log.Info("Nuevo Brand Brand New revision detected", "revision", repository.Status.Artifact.Revision)
 
-	loadingRules := clientcmd.NewDefaultClientConfigLoadingRules()
-	configOverrides := &clientcmd.ConfigOverrides{}
-	kubeConfig := clientcmd.NewNonInteractiveDeferredLoadingClientConfig(loadingRules, configOverrides)
-	config, err := kubeConfig.ClientConfig()
+	//loadingRules := clientcmd.NewDefaultClientConfigLoadingRules()
+	//configOverrides := &clientcmd.ConfigOverrides{}
+	//kubeConfig := clientcmd.NewNonInteractiveDeferredLoadingClientConfig(loadingRules, configOverrides)
+	//config, err := kubeConfig.ClientConfig()
+
+	config, err := rest.InClusterConfig()
+
 	if err != nil {
 		panic(err.Error())
 	}
@@ -57,17 +60,19 @@ func (r *GitRepositoryWatcher) Reconcile(ctx context.Context, req ctrl.Request) 
 
 	b, err := ioutil.ReadFile(filename)
 	if err != nil {
-		//log.Error(err)
+		panic(err.Error())
 	}
 	//log.Printf("%q \n", string(b))
 
 	c, err := kubernetes.NewForConfig(config)
 	if err != nil {
+		panic(err.Error())
 		//log.Error(err)
 	}
 
 	dd, err := dynamic.NewForConfig(config)
 	if err != nil {
+		panic(err.Error())
 		//log.Error(err)
 	}
 
@@ -81,6 +86,7 @@ func (r *GitRepositoryWatcher) Reconcile(ctx context.Context, req ctrl.Request) 
 		obj, gvk, err := yaml.NewDecodingSerializer(unstructured.UnstructuredJSONScheme).Decode(rawObj.Raw, nil, nil)
 		unstructuredMap, err := runtime.DefaultUnstructuredConverter.ToUnstructured(obj)
 		if err != nil {
+			panic(err.Error())
 			//log.Error(err)
 		}
 
@@ -88,12 +94,14 @@ func (r *GitRepositoryWatcher) Reconcile(ctx context.Context, req ctrl.Request) 
 
 		gr, err := restmapper.GetAPIGroupResources(c.Discovery())
 		if err != nil {
+			panic(err.Error())
 			//log.Error(err)
 		}
 
 		mapper := restmapper.NewDiscoveryRESTMapper(gr)
 		mapping, err := mapper.RESTMapping(gvk.GroupKind(), gvk.Version)
 		if err != nil {
+			panic(err.Error())
 			//log.Error(err)
 		}
 
@@ -108,10 +116,12 @@ func (r *GitRepositoryWatcher) Reconcile(ctx context.Context, req ctrl.Request) 
 		}
 
 		if _, err := dri.Create(context.Background(), unstructuredObj, metav1.CreateOptions{}); err != nil {
+			panic(err.Error())
 			//log.Error(err)
 		}
 	}
 	if err != io.EOF {
+		panic(err.Error())
 		//log.Error("eof ", err)
 	}
 

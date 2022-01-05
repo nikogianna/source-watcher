@@ -5,4 +5,4 @@ resources:
 images:
 - name: source-watcher
   newName: nikogianna19/source-watch
-  newTag: latest
+  newTag: v4

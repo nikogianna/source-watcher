@@ -1,0 +1,31 @@
+apiVersion: v1
+data:
+  run-clone.yaml: |
+    apiVersion: tekton.dev/v1beta1
+    kind: PipelineRun
+    metadata:
+      generateName: buildpacks-test-pipeline-run-
+    spec:
+      serviceAccountName: buildpacks-service-account # Only needed if you set up authorization
+      pipelineRef:
+        name: no-buildpacks-test-pipeline-5
+      workspaces:
+        - name: source-workspace
+          #subPath: source
+          persistentVolumeClaim:
+            claimName: buildpacks-source-pvc
+        - name: cache-workspace
+          subPath: cache
+          persistentVolumeClaim:
+            claimName: buildpacks-source-pvc
+        - name: basic-auth
+          secret:
+            secretName: gitsecret
+      params:
+        - name: image
+          value: nikogianna19/test:v4 #index.docker.io/v2/nikogianna19/test #<REGISTRY/IMAGE NAME, eg gcr.io/test/image > # This defines the name of output image
+kind: ConfigMap
+metadata:
+  creationTimestamp: null
+  name: pipeconfig
+  namespace: source-system
