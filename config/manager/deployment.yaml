@@ -35,8 +35,6 @@ spec:
                   fieldPath: metadata.namespace
           args:
             - --log-level=info
-            - --log-json
-            - --enable-leader-election
           livenessProbe:
             httpGet:
               port: http
